@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Herd Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦁 Animal Herd Detection</h1>
+            <p class="subtitle">Upload an image to detect animals and count herds</p>
+        </header>
+
+        <main>
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <div class="upload-box">
+                    <input type="file" id="imageInput" accept="image/jpg,image/jpeg,image/png,image/gif" />
+                    <label for="imageInput" class="upload-label">
+                        <div class="upload-icon">📸</div>
+                        <p>Click to upload or drag & drop</p>
+                        <small>JPG, JPEG, PNG, or GIF (Max 16MB)</small>
+                    </label>
+                </div>
+                <button id="detectBtn" class="btn btn-primary" disabled>Detect Animals</button>
+            </section>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner hidden">
+                <div class="spinner"></div>
+                <p>Processing image...</p>
+            </div>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section hidden">
+                <!-- Herd Alert -->
+                <div id="herdAlert" class="herd-alert hidden">
+                    <div class="alert-content">
+                        <span class="alert-icon">🚨</span>
+                        <span>HERD ALERT!</span>
+                    </div>
+                </div>
+
+                <!-- Animal Count -->
+                <div class="result-info">
+                    <div class="count-box">
+                        <h2>Animals Detected</h2>
+                        <div class="count" id="animalCount">0</div>
+                    </div>
+                    <div class="message-box">
+                        <p id="resultMessage"></p>
+                    </div>
+                </div>
+
+                <!-- Annotated Image -->
+                <div class="image-container">
+                    <img id="resultImage" src="" alt="Detection Result" />
+                </div>
+
+                <!-- Reset Button -->
+                <button id="resetBtn" class="btn btn-secondary">Upload Another Image</button>
+            </section>
+
+            <!-- Error Section -->
+            <div id="errorSection" class="error-section hidden">
+                <div class="error-message">
+                    <span class="error-icon">⚠️</span>
+                    <p id="errorText"></p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Animal Herd Detection • YOLOv3 + OpenCV + Flask</p>
+        </footer>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const detectBtn = document.getElementById('detectBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const resultsSection = document.getElementById('resultsSection');
+        const errorSection = document.getElementById('errorSection');
+        const herdAlert = document.getElementById('herdAlert');
+        const animalCount = document.getElementById('animalCount');
+        const resultImage = document.getElementById('resultImage');
+        const resultMessage = document.getElementById('resultMessage');
+        const errorText = document.getElementById('errorText');
+
+        // File input change handler
+        imageInput.addEventListener('change', function() {
+            detectBtn.disabled = !this.files.length;
+            errorSection.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+        });
+
+        // Drag and drop
+        const uploadLabel = document.querySelector('.upload-label');
+        uploadLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadLabel.style.borderColor = '#4CAF50';
+            uploadLabel.style.backgroundColor = '#f0f8f0';
+        });
+
+        uploadLabel.addEventListener('dragleave', () => {
+            uploadLabel.style.borderColor = '#ddd';
+            uploadLabel.style.backgroundColor = '#fff';
+        });
+
+        uploadLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadLabel.style.borderColor = '#ddd';
+            uploadLabel.style.backgroundColor = '#fff';
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                imageInput.files = files;
+                detectBtn.disabled = false;
+            }
+        });
+
+        // Detect button click
+        detectBtn.addEventListener('click', async function() {
+            if (!imageInput.files.length) {
+                showError('Please select an image first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', imageInput.files[0]);
+
+            // Show loading state
+            loadingSpinner.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+            errorSection.classList.add('hidden');
+            detectBtn.disabled = true;
+
+            try {
+                const response = await fetch('/detect', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'Detection failed');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                loadingSpinner.classList.add('hidden');
+                detectBtn.disabled = false;
+            }
+        });
+
+        // Display results
+        function displayResults(data) {
+            animalCount.textContent = data.animal_count;
+            resultMessage.textContent = data.message;
+            resultImage.src = data.image;
+
+            // Show/hide herd alert
+            if (data.herd_alert) {
+                herdAlert.classList.remove('hidden');
+            } else {
+                herdAlert.classList.add('hidden');
+            }
+
+            resultsSection.classList.remove('hidden');
+        }
+
+        // Show error
+        function showError(message) {
+            errorText.textContent = message;
+            errorSection.classList.remove('hidden');
+        }
+
+        // Reset button
+        resetBtn.addEventListener('click', function() {
+            imageInput.value = '';
+            detectBtn.disabled = true;
+            resultsSection.classList.add('hidden');
+            errorSection.classList.add('hidden');
+            imageInput.focus();
+        });
+
+        // Enable/disable detect button on load
+        detectBtn.disabled = !imageInput.files.length;
+    </script>
+</body>
+</html>
