@@ -1,0 +1,4 @@
+Predictions for new texts:
+- 'Free prize waiting for you, claim now' -> spam
+- 'Are you coming to class today?' -> ham
+- 'Buy now and get 50% off' -> spam
