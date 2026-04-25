@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Admission Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="chatbot-container">
+        <!-- Header -->
+        <div class="chatbot-header">
+            <div class="header-content">
+                <h1>🎓 University Admission Chatbot</h1>
+                <p>Your AI Assistant for University Admissions</p>
+            </div>
+        </div>
+
+        <!-- Chat Display Area -->
+        <div class="chat-box" id="chatBox">
+            <div class="chat-message bot-message">
+                <div class="message-content">
+                    <p>Hello! 👋 Welcome to our University Admissions Chatbot. I can help you with information about our programs, admission requirements, deadlines, and more.</p>
+                    <p><strong>Try asking me about:</strong></p>
+                    <ul>
+                        <li>Available programs</li>
+                        <li>Admission requirements</li>
+                        <li>Application deadlines</li>
+                        <li>Tuition and fees</li>
+                        <li>Contact information</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <form id="chatForm">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="userInput" 
+                        placeholder="Ask about our programs, requirements, deadlines..." 
+                        autocomplete="off"
+                    >
+                    <button type="submit" class="send-button">
+                        <span>Send</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <button class="quick-btn" onclick="sendMessage('Tell me about your programs')">Programs</button>
+            <button class="quick-btn" onclick="sendMessage('What are the admission requirements?')">Requirements</button>
+            <button class="quick-btn" onclick="sendMessage('What are the application deadlines?')">Deadlines</button>
+            <button class="quick-btn" onclick="sendMessage('How much is the tuition?')">Tuition</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
